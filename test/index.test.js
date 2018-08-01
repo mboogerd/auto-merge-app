@@ -1,16 +1,12 @@
 const { Application } = require('probot')
 // Requiring our app implementation
-const prMergeBot = require('..')
+const prMergeBot = require('../lib/index')
 // Test data
 const checksuiteSuccessPayload = require('./fixtures/checksuite_success.json')
 const checksuiteNonSuccessPayload = require('./fixtures/checksuite_non_success.json')
 const getPRMergePayload = require('./fixtures/get-pr-merge.json')
 const getPRNonMergePayload = require('./fixtures/get-pr-non-merge.json')
-
-test('that we can run tests', () => {
-  // your real tests go here
-  expect(1 + 2 + 3).toBe(6)
-})
+const mergeSuccessPayload = require('./fixtures/merge-success.json')
 
 describe('Pull Request Merger', () => {
   let app, github
@@ -19,13 +15,13 @@ describe('Pull Request Merger', () => {
     app = new Application()
     // Initialize the app based on the code from index.js
     app.load(prMergeBot)
-    
-    getPullRequestMock = jest.fn(pullRequestsGetParams => {
-      if(pullRequestsGetParams.number == 1) return Promise.resolve(getPRMergePayload)
+
+    const getPullRequestMock = jest.fn(pullRequestsGetParams => {
+      if (pullRequestsGetParams.number === 1) return Promise.resolve(getPRMergePayload)
       else return Promise.resolve(getPRNonMergePayload)
     })
 
-    mergePRMock = jest.fn(pullRequestsMergeParams => Promise.resolve({}))
+    const mergePRMock = jest.fn(pullRequestsMergeParams => Promise.resolve(mergeSuccessPayload))
 
     github = {
       pullRequests: {
