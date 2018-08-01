@@ -1,0 +1,42 @@
+{
+  "name": "auto-merge-bot",
+  "version": "1.0.0",
+  "description": "Automatically merges pull requests labeled merge-when-ready if all checks pass",
+  "author": "Merlijn Boogerd <mlboogerd@gmail.com> (https://github.com/mboogerd)",
+  "license": "ISC",
+  "repository": "https://github.com/mboogerd/auto-merge-bot.git",
+  "homepage": "https://github.com/mboogerd/auto-merge-bot",
+  "bugs": "https://github.com/mboogerd/auto-merge-bot/issues",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app"
+  ],
+  "scripts": {
+    "dev": "nodemon --exec \"npm start\"",
+    "start": "probot run ./index.js",
+    "lint": "standard --fix",
+    "test": "jest && standard",
+    "test:watch": "jest --watch --notify --notifyMode=change --coverage"
+  },
+  "dependencies": {
+    "probot": "^7.0.0"
+  },
+  "devDependencies": {
+    "jest": "^22.4.4",
+    "nodemon": "^1.17.2",
+    "smee-client": "^1.0.2",
+    "standard": "^10.0.3"
+  },
+  "engines": {
+    "node": ">= 8.3.0"
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
+  "jest": {
+    "testURL": "http://localhost"
+  }
+}
