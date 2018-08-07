@@ -5,6 +5,7 @@ export namespace PR {
   export const actionCompleted = 'completed'
   export const actionReopened = 'reopened'
   export const actionOpened = 'opened'
+  export const actionPrLabeled = 'labeled'
   export const conclusionSuccess = 'success'
   export const mergeWhenReady = 'merge when ready'
 

@@ -8,8 +8,8 @@ const checksuiteNonSuccessPayload = require('./fixtures/checksuite_non_success.j
 const getPRMergePayload = require('./fixtures/get-pr-merge.json')
 const getPRNonMergePayload = require('./fixtures/get-pr-non-merge.json')
 const mergeSuccessPayload = require('./fixtures/merge-success.json')
-const prEligibleClosedPayload = require('./fixtures/pr-eligible-closed.json')
-const prEligibleOpenedPayload = require('./fixtures/pr-eligible-opened.json')
+const prClosedPayload = require('./fixtures/pr-eligible-closed.json')
+const prLabeledPayload = require('./fixtures/pr-eligible-labeled.json')
 
 describe('Pull Request Merger', () => {
   let app, github
@@ -73,5 +73,56 @@ describe('Pull Request Merger', () => {
 
     expect(github.pullRequests.merge).toBeCalledWith({ owner: 'github', repo: 'hello-world', number: 1 })
     expect(github.pullRequests.merge).not.toBeCalledWith({ owner: 'github', repo: 'hello-world', number: 2 })
+  })
+
+  /* Deprecated: Everything below this line - once Ebay migrates to Github 2.14 */
+  test('monitor eligible PRs after labeling and merge them once clean', async () => {
+    github = {
+      pullRequests: {
+        get: jest.fn(_ => Promise.resolve({data: getPRMergePayload})),
+        merge: mergePRMock()
+      }
+    }
+    initializeApp(github)
+
+    await app.receive({
+      event: 'pull_request',
+      payload: prLabeledPayload
+    })
+
+    // Jup, horrific... should expose configured delays (or poll at smaller intervals)
+    await Async.timeoutPromise(3000)
+
+    expect(github.pullRequests.get).toBeCalledWith({ owner: 'github', repo: 'hello-world', number: 1 })
+    expect(github.pullRequests.merge).toBeCalledWith({ owner: 'github', repo: 'hello-world', number: 1 })
+  })
+
+  test('stop monitoring without merging eligible PRs after they are closed', async () => {
+    github = {
+      pullRequests: {
+        get: jest.fn(_ => Promise.resolve({data: getPRNonMergePayload})),
+        merge: mergePRMock()
+      }
+    }
+    initializeApp(github)
+
+    await app.receive({
+      event: 'pull_request',
+      payload: prLabeledPayload
+    })
+
+    // Jup, horrific... should expose configured delays
+    await Async.timeoutPromise(3000)
+
+    expect(github.pullRequests.get).toBeCalledWith({ owner: 'github', repo: 'hello-world', number: 1 })
+    expect(github.pullRequests.merge).not.toBeCalled()
+  })
+
+  test('not to monitor anything but labeled PRs', async () => {
+    await app.receive({
+      event: 'pull_request',
+      payload: prClosedPayload
+    })
+    expect(github.pullRequests.merge).not.toBeCalled()
   })
 })

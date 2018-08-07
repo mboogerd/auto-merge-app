@@ -1,5 +1,5 @@
 {
-    "action": "opened",
+    "action": "labeled",
     "number": 1,
     "pull_request": {
       "url": "https://api.github.com/repos/github/hello-world/pulls/1",

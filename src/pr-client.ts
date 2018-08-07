@@ -1,6 +1,7 @@
 import { Context } from 'probot'
 import { WebhookPayloadWithRepository } from 'probot/lib/context'
 import { PR } from './model'
+import { Async } from './async'
 
 export namespace Client {
 
@@ -45,5 +46,21 @@ export namespace Client {
             .merge(pr.id)
             // `undefined` error if just passing this as a function literal
             .then(r => pr.registerMergeResult(r.data))
+    }
+
+    /**
+     * Waits until the given PR can be merged or further monitoring can stop
+     * @param context 
+     * @param pr the pull request id to poll
+     * @returns A Promise with the final PullRequest state
+     * 
+     * @deprecated FIXME: Remove once Ebay migrated to Github Enterprise 2.14!
+     */
+    export async function waitUntilActionable(context: Context, prId: PR.PrId) {
+      return Async.repeatUntil(
+        () => getPullRequest(context, prId),
+        pr => pr.shouldMerge() || !pr.isAutoMergeEligible(),
+        0, // These parameters should of course be externalized, but hey, temp fix
+        300000) // schedule every 5 minutes
     }
 }
